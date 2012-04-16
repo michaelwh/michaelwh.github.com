@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+	<script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript">
+      $(function() {
+		$("#list1 li").hover(function() {
+			$(this).addClass("red");
+		}, function() {
+			$(this).removeClass("red");
+		});
+		
+		$("#lol").click(function() {
+			$(this).append("KEK");
+		});
+		
+	  });
+    </script>
+	<style>
+		.red{
+			color: red;
+		}
+		
+		#list1 li{
+			display: inline;
+		}
+		
+	</style>
+  </head>
+  <body>
+    <a href="http://jquery.com/">jQuery</a>
+	<a id="lol" href="#lol">Hello</a>
+	<ul id="list1">
+		<li>Hello</li>
+		<li>Hello</li>
+		<li>Hello</li>
+		<li>Hello</li>
+		<li>Hello</li>
+	</ul>
+
+  </body>
+</html>
