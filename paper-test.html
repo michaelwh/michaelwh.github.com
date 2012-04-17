@@ -2,48 +2,95 @@
 <html>
 <head>
 <script type="text/javascript" src="js/paper.js"></script>
-<script type="text/javascript">
-    paper.install(window);
+<script type="text/paperscript" canvas="myCanvas">
+
+	function getRandomInteger(min, max) {
+		return min + Math.floor(Math.random() * (max - min + 1));
+	}
+	
+	function findClosest(object, group) {
+		var closestIndex = 0;
+		var closestDistance = (object.position - group.children[0].position).length;
+		for (var j = 1; j < group.children.length; j++) {
+			
+			var distance = (object.position - group.children[j].position).length;
+			if (distance < closestDistance) {
+				
+				closestIndex = j;
+				closestDistance = distance;
+			}
+		}
+		return group.children[closestIndex];
+	}
+
     // Keep global references to both tools, so the HTML
     // links below can access them.
-    var tool1, tool2;
+		
+		
+		circles = new Group();
+		var circleRadius = 10
+		var movementSpeed = 1
+		
+		var food = new Group();
+		
+		var boundRect = new Path.Rectangle(new Point(0, 0), view.size);
+		boundRect.strokeColor = 'black';
+		
+		for(var i = 0; i < 50; i++) {
+			var circle = new Path.Circle(Point.random() * new Point(view.size.width, view.size.height), circleRadius);
+			circle.fillColor = 'red';
+			circle.strokeColor = 'black';
+			circle.fillColor.hue = Math.random() * 360;
+			circle.mass = Math.random();
+			circle.currentDirection = new Point(0, 0);
+			circle.lastChangeCount = 0;
+			circles.addChild(circle);
+		}
+		function onFrame(event) {
+			//circles.rotate(0.05);
+			
+			for (var i = 0; i < circles.children.length; i++) {
+				var currentCircle = circles.children[i];
+				
+				// ---- random movement
+				currentCircle.lastChangeCount++;
+				if (currentCircle.lastChangeCount > Math.floor(Math.random() * 500)) {
+					currentCircle.lastChangeCount = 0;
+					if (food.children.length > 0) {
+						// find closest food
+						var chosenFood = findClosest(currentCircle, food);
+						//var chosenFood = food.children[getRandomInteger(0, food.children.length - 1)];
+						currentCircle.direction = (chosenFood.position - currentCircle.position).normalize();
+						// add a bit of randomness
+						currentCircle.direction.angle += (Math.random() * 100) - 50;
+					} else {
+						currentCircle.direction = ((Point.random() * 2) - 1).normalize();
+					}
+				}
+				
+				// ---- keep from going outside bounds
+				var newPos = currentCircle.position + currentCircle.direction;
+				if (newPos.x < 0 || newPos.y < 0 || newPos.x > view.size.width || newPos.y > view.size.height) {
+					currentCircle.direction *= -1;
+				}
+				
+				//currentCircle.position += currentCircle.currentDirection * movementSpeed;
+				currentCircle.position += currentCircle.direction;
+			}
+		};
+		
+		function onMouseUp(event) {
+			var foodrect = new Path.Rectangle(event.point.clone(), new Size(10,10));
+			foodrect.strokeColor = 'black';
+			foodrect.fillColor = 'yellow';
+			food.addChild(foodrect);
+		};
+		
 
-    window.onload = function() {
-        paper.setup('myCanvas');
-
-        // Create two drawing tools.
-        // tool1 will draw straight lines,
-        // tool2 will draw clouds.
-
-        // Both share the mouseDown event:
-        var path;
-        function onMouseDown(event) {
-            path = new Path();
-            path.strokeColor = 'black';
-            path.add(event.point);
-        }
-
-        tool1 = new Tool();
-        tool1.onMouseDown = onMouseDown;
-
-        tool1.onMouseDrag = function(event) {
-            path.add(event.point);
-        }
-
-        tool2 = new Tool();
-        tool2.minDistance = 20;
-        tool2.onMouseDown = onMouseDown;
-
-        tool2.onMouseDrag = function(event) {
-            // Use the arcTo command to draw cloudy lines
-            path.arcTo(event.point);
-        }
-    }
+    
 </script>
 </head>
 <body>
-    <a href="javascript:tool1.activate();">Lines</a>
-    <a href="javascript:tool2.activate();">Clouds</a>
-    <canvas id="myCanvas" resize></canvas>
+    <canvas id="myCanvas" width="500" height="500"></canvas>
 </body>
 </html>
